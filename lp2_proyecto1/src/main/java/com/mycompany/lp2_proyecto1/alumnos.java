@@ -4,9 +4,13 @@
  */
 package com.mycompany.lp2_proyecto1;
 
+import com.toedter.calendar.JDateChooser;
 import java.sql.CallableStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.SimpleDateFormat;
+import javafx.scene.control.ComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
@@ -24,6 +28,10 @@ public class alumnos {
     String apellido;
     String edad;
     String direccion;
+    String fechanac;
+    String ciudad;
+    String genero;
+    String email;
 
     public int getId() {
         return id;
@@ -64,19 +72,65 @@ public class alumnos {
     public void setDireccion(String direccion) {
         this.direccion = direccion;
     }
-    public void insertarAlumno(JTextField paramnombre, JTextField paramapellido, JTextField paramedad, JTextField paramdireccion){
+
+    public String getFechanac() {
+        return fechanac;
+    }
+
+    public void setFechanac(String fechanac) {
+        this.fechanac = fechanac;
+    }
+
+    public String getCiudad() {
+        return ciudad;
+    }
+
+    public void setCiudad(String ciudad) {
+        this.ciudad = ciudad;
+    }
+
+    public String getGenero() {
+        return genero;
+    }
+
+    public void setGenero(String genero) {
+        this.genero = genero;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+    
+    
+    
+    public void insertarAlumno(JTextField paramnombre, JTextField paramapellido, JTextField paramedad, JTextField paramdireccion, JDateChooser paramfechanac, ComboBox paramciudad, ComboBox paramgenero, JTextField paramemail){
         setNombre(paramnombre.getText());
         setApellido(paramapellido.getText());
         setEdad(paramedad.getText());
         setDireccion(paramdireccion.getText());
+        setFechanac(paramfechanac.getDateFormatString());
+        
+        //setCiudad(paramciudad.getText());
+        //setGenero(paramgenero.getText());
+        //setEmail(paramemail.getText());
         conexion objetoConexion = new conexion();
-        String Consulta = "INSERT INTO alumnos(nombre,apellido,edad,direccion) VALUES(?,?,?,?);";
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String date = sdf.format(paramfechanac.getDate());
+        String Consulta = "INSERT INTO alumnos(nombre,apellido,edad,direccion,fechanac,ciudad,genero,email) VALUES(?,?,?,?,?,?,?,?);";
         try{
             CallableStatement cs = objetoConexion.establecerConexion().prepareCall(Consulta);
             cs.setString(1,getNombre());
             cs.setString(2,getApellido());
             cs.setString(3,getEdad());
             cs.setString(4,getDireccion());
+            cs.setString(5,getFechanac());
+            cs.setString(6,getCiudad());
+            cs.setString(7,getGenero());
+            cs.setString(8,getEmail());
             cs.execute();
             JOptionPane.showMessageDialog(null,"Se creo correctamente!");
         }catch(Exception e){
@@ -95,9 +149,13 @@ public class alumnos {
         model.addColumn("Apellido");
         model.addColumn("Edad");
         model.addColumn("Direccion");
-        
+        model.addColumn("Fecha Nac.");
+        model.addColumn("Ciudad");
+        model.addColumn("Genero");
+        model.addColumn("Email");
+        paramtabla.setModel(model);
         sql="select * from alumnos";
-        String [] datos = new String[5];
+        String [] datos = new String[9];
         Statement st;
          try{
              st = ObjetoConexion.establecerConexion().createStatement();
@@ -108,11 +166,77 @@ public class alumnos {
              datos[2]=rs.getString(3);
              datos[3]=rs.getString(4);
              datos[4]=rs.getString(5);
+             datos[5]=rs.getString(6);
+             datos[6]=rs.getString(7);
+             datos[7]=rs.getString(8);
+             datos[8]=rs.getString(9);
              model.addRow(datos);
              }
              paramtabla.setModel(model);
          }catch(Exception e){
              JOptionPane.showMessageDialog(null,"Error al mostrar los registros"+e.toString());
          }
+    }
+    public void SelecionarAlumno(JTable paramtabla, JTextField paramid, JTextField paramnombre, JTextField paramapellido, JTextField paramedad, JTextField paramdireccion, JDateChooser paramfechanac, ComboBox paramciudad, JTextField paramgenero, JTextField paramemail){
+        try{
+        int fila = paramtabla.getSelectedRow();
+        if(fila>=0){
+            paramid.setText(paramtabla.getValueAt(fila, 0).toString());
+            paramnombre.setText(paramtabla.getValueAt(fila, 1).toString());
+            paramapellido.setText(paramtabla.getValueAt(fila, 2).toString());
+            paramedad.setText(paramtabla.getValueAt(fila, 3).toString());
+            paramdireccion.setText(paramtabla.getValueAt(fila, 4).toString());
+            //paramfechanac.setText(paramtabla.getValueAt(fila, 5).toString());
+            //paramciudad.setText(paramtabla.getValueAt(fila, 6).toString());
+            //paramgenero.setText(paramtabla.getValueAt(fila, 7).toString());
+            //paramemail.setText(paramtabla.getValueAt(fila, 8).toString());
+        }
+        }catch(Exception e){
+            JOptionPane.showMessageDialog(null,"Error al selecionar la tabla, error: "+e.toString());
+        }
+    }
+    public void Editar(JTextField paramid, JTextField paramnombre, JTextField paramapellido, JTextField paramedad, JTextField paramdireccion, JTextField paramfechanac, JTextField paramciudad, JTextField paramgenero, JTextField paramemail){
+        setId(Integer.parseInt(paramid.getText()));
+        setNombre(paramnombre.getText());
+        setApellido(paramapellido.getText());
+        setEdad(paramedad.getText());
+        setDireccion(paramdireccion.getText());
+        //setFechanac(paramfechanac.getDateFormatString());
+        //setCiudad(paramciudad.getText());
+        //setGenero(paramgenero.getText());
+        //setEmail(paramemail.getText());
+        
+        conexion objetoConexion = new conexion();
+        String editar="UPDATE alumnos set alumnos.nombre=?,alumnos.apellido=?,alumnos.edad=?,alumnos.direccion=?,alumnos.fechanac=?,alumnos.ciudad=?,alumnos.genero=?,alumnos.email=? where alumnos.id=?";
+        try{
+   CallableStatement cs = objetoConexion.establecerConexion().prepareCall(editar);
+   cs.setString(1,getNombre());
+   cs.setString(2,getApellido());
+   cs.setString(3,getEdad());
+   cs.setString(4,getDireccion());
+   cs.setString(5,getFechanac());
+   cs.setString(6,getCiudad());
+   cs.setString(7,getGenero());
+   cs.setString(8,getEmail());
+   cs.setInt(9,getId());
+   cs.execute();
+   JOptionPane.showMessageDialog(null,"Se edito correctamente!");
+        }catch(SQLException e){
+             JOptionPane.showMessageDialog(null,"Error al editar, error: "+e.toString());
+        }
+    }
+    public void Eliminar(JTextField paramid){
+        conexion objetoConexion = new conexion();
+        setId(Integer.parseInt(paramid.getText()));
+        String eliminar="DELETE FROM alumnos WHERE id=?";
+    try{
+   CallableStatement cs = objetoConexion.establecerConexion().prepareCall(eliminar);
+   cs.setInt(1, getId());
+   cs.execute();
+   JOptionPane.showMessageDialog(null,"Eliminado correctamente");
+    }catch(Exception e){
+   JOptionPane.showMessageDialog(null,"Error al eliminar, error: "+e.toString());
+    }
+        
     }
 }
