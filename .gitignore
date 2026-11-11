@@ -4,3 +4,6 @@
 /pereirafinal_lp2/target/
 /projecto1/target/
 /diagnostica/target/
+
+# Compilados de Maven
+target/
